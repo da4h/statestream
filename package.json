@@ -23,8 +23,13 @@
     "@nestjs/common": "^10.0.0",
     "@nestjs/core": "^10.0.0",
     "@nestjs/platform-express": "^10.0.0",
+    "@types/ws": "^8.5.10",
+    "aedes": "^0.51.2",
+    "home-assistant-js-websocket": "^9.4.0",
+    "mqtt": "^5.7.0",
     "reflect-metadata": "^0.2.0",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "ws": "^8.17.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
