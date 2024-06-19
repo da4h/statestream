@@ -70,5 +70,8 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "publishConfig": {
+    "@da4h:registry": "https://npm.pkg.github.com"
   }
 }
