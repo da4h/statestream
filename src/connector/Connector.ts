@@ -1,4 +1,4 @@
-import { Publisher } from './Publisher';
+import { Publisher } from '../publisher/Publisher';
 
 export enum ConnectionState {
   Available,
@@ -27,5 +27,5 @@ export abstract class Connector {
     return this.subscriptions[key];
   }
 
-  public abstract publish(key: string, data: any);
+  public abstract publish(key: string, publisher: Publisher<any>);
 }

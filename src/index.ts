@@ -1,4 +1,4 @@
-export * from './Connector';
-export * from './IPublisher';
-export * from './Publisher';
+export * from './connector/Connector';
+export * from './publisher/IPublisher';
+export * from './publisher/Publisher';
 export * from './Module';

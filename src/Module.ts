@@ -1,5 +1,5 @@
-import { ConnectionState, Connector } from './Connector';
-import { Publisher } from './Publisher';
+import { ConnectionState, Connector } from './connector/Connector';
+import { Publisher } from './publisher/Publisher';
 
 export function bind(opts: {
   connector: Connector;
