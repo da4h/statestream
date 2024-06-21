@@ -28,7 +28,7 @@ export function bind(opts: {
 export function expose(opts: { connector: Connector; key: string }) {
   return function attachDecorator(module: any, propertyKey: string) {
     const publisher = new Publisher<any>();
-    publisher.subscribe((value) => opts.connector.publish(opts.key, value));
+    opts.connector.publish(opts.key, publisher);
     Object.defineProperty(module, propertyKey, {
       get() {
         return publisher;
