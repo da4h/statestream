@@ -72,6 +72,10 @@ export class Module extends Connector {
   }
 
   private dependencyStateChanged() {
+    if (this._dependencies === undefined) {
+      this._dependencies = [];
+    }
+    
     if (this.state.value === ConnectionState.Available) {
       if (
         this._dependencies
