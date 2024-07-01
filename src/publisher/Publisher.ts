@@ -2,13 +2,18 @@ import { IStream as IPublisher } from './IPublisher';
 
 // TODO: switch if unavailable / whenUnavailable(..)
 export class Publisher<T> implements IPublisher<T> {
-  private _onNext: ((value: T) => void)[] = [];
-  private _onEmpty: (() => void)[] = [];
+  private _onNext: ((actual: T, previous: T, previousAt: Date) => void)[] = [];
+  private _onEmpty: ((previous: T, previousAt: Date) => void)[] = [];
   private _onError: ((error: Error) => void)[] = [];
   private _value: T = undefined;
+  private _at: Date = undefined;
 
   public get value() {
     return this._value;
+  }
+
+  public get at() {
+    return this._at;
   }
 
   public publish(value: T | Error): void {
@@ -17,19 +22,26 @@ export class Publisher<T> implements IPublisher<T> {
         subscriber(value);
       }
     } else if (value === undefined || value === null) {
+      let previous = this._value;
+      let previousAt = this._at;
+      // TODO reconsider this
       this._value = value;
+      this._at = new Date();
       for (const subscriber of this._onEmpty) {
-        subscriber();
+        subscriber(previous, previousAt);
       }
     } else {
+      let previous = this._value;
+      let previousAt = this._at;
       this._value = value;
+      this._at = new Date();
       for (const subscriber of this._onNext) {
-        subscriber(value);
+        subscriber(value, previous, previousAt);
       }
     }
   }
 
-  public subscribe(subscriber: (value: T) => void) {
+  public subscribe(subscriber: (actual: T, previous: T, previousAt: Date) => void) {
     this._onNext.push(subscriber);
   }
 
@@ -37,7 +49,7 @@ export class Publisher<T> implements IPublisher<T> {
     this._onError.push(subscriber);
   }
 
-  public onEmpty(subscriber: () => void) {
+  public onEmpty(subscriber: (previous: T, previousAt: Date) => void) {
     this._onEmpty.push(subscriber);
   }
 
@@ -48,8 +60,8 @@ export class Publisher<T> implements IPublisher<T> {
       this._changed.publish(this._value);
       this.onEmpty(() => this._changed.publish(undefined));
       this.onError((e) => this._changed.publish(e));
-      this.subscribe((value) => {
-        if (value !== this._changed.value) {
+      this.subscribe((value, previous) => {
+        if (value !== previous) {
           this._changed.publish(value);
         }
       });
@@ -58,13 +70,13 @@ export class Publisher<T> implements IPublisher<T> {
     return this._changed;
   }
 
-  public switchIfEmpty(value: T | (() => T)): Publisher<T> {
+  public switchIfEmpty(value: T | ((previous: T, previousAt: Date) => T)): Publisher<T> {
     const publisher = this.createStream<T>();
     this.subscribe((v) => publisher.publish(v));
     this.onError((e) => publisher.publish(e));
-    this.onEmpty(() => {
-      if (this.isCallback<() => T>(value)) {
-        publisher.publish(value());
+    this.onEmpty((previous, previousAt) => {
+      if (this.isCallback<(previous: T, previousAt: Date) => T>(value)) {
+        publisher.publish(value(previous, previousAt));
       } else {
         publisher.publish(value);
       }
@@ -82,12 +94,12 @@ export class Publisher<T> implements IPublisher<T> {
     return publisher;
   }
 
-  public filter(filter: (value: T) => boolean): Publisher<T> {
+  public filter(filter: (value: T, previous: T, previousAt: Date) => boolean): Publisher<T> {
     const publisher = this.createStream<T>();
     this.onError((e) => publisher.publish(e));
     this.onEmpty(() => publisher.publish(undefined));
-    this.subscribe((value) => {
-      if (filter(value)) publisher.publish(value);
+    this.subscribe((value, previous, previousAt) => {
+      if (filter(value, previous, previousAt)) publisher.publish(value);
     });
     return publisher;
   }
