@@ -22,8 +22,8 @@ export class Publisher<T> implements IPublisher<T> {
         subscriber(value);
       }
     } else if (value === undefined || value === null) {
-      let previous = this._value;
-      let previousAt = this._at;
+      const previous = this._value;
+      const previousAt = this._at;
       // TODO reconsider this
       this._value = value;
       this._at = new Date();
@@ -31,8 +31,8 @@ export class Publisher<T> implements IPublisher<T> {
         subscriber(previous, previousAt);
       }
     } else {
-      let previous = this._value;
-      let previousAt = this._at;
+      const previous = this._value;
+      const previousAt = this._at;
       this._value = value;
       this._at = new Date();
       for (const subscriber of this._onNext) {
@@ -41,7 +41,9 @@ export class Publisher<T> implements IPublisher<T> {
     }
   }
 
-  public subscribe(subscriber: (actual: T, previous: T, previousAt: Date) => void) {
+  public subscribe(
+    subscriber: (actual: T, previous: T, previousAt: Date) => void,
+  ) {
     this._onNext.push(subscriber);
   }
 
@@ -70,7 +72,9 @@ export class Publisher<T> implements IPublisher<T> {
     return this._changed;
   }
 
-  public switchIfEmpty(value: T | ((previous: T, previousAt: Date) => T)): Publisher<T> {
+  public switchIfEmpty(
+    value: T | ((previous: T, previousAt: Date) => T),
+  ): Publisher<T> {
     const publisher = this.createStream<T>();
     this.subscribe((v) => publisher.publish(v));
     this.onError((e) => publisher.publish(e));
@@ -94,7 +98,9 @@ export class Publisher<T> implements IPublisher<T> {
     return publisher;
   }
 
-  public filter(filter: (value: T, previous: T, previousAt: Date) => boolean): Publisher<T> {
+  public filter(
+    filter: (value: T, previous: T, previousAt: Date) => boolean,
+  ): Publisher<T> {
     const publisher = this.createStream<T>();
     this.onError((e) => publisher.publish(e));
     this.onEmpty(() => publisher.publish(undefined));
