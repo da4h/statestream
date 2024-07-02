@@ -1,11 +1,14 @@
 {
   "name": "@da4h/core",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "",
   "author": "",
   "private": false,
   "license": "UNLICENSED",
   "main": "dist/index.js",
+  "files": [
+    "dist/"
+  ],
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\"",
