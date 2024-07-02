@@ -1,6 +1,6 @@
 {
   "name": "@da4h/core",
-  "version": "0.0.9",
+  "version": "0.0.1",
   "description": "",
   "author": "",
   "private": false,
@@ -74,8 +74,5 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
-  },
-  "publishConfig": {
-    "@da4h:registry": "https://npm.pkg.github.com"
   }
 }
