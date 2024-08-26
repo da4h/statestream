@@ -1,8 +1,8 @@
 import { connect, IConnackPacket, MqttClient } from 'mqtt';
-import { Connector } from './Connector';
-import { Publisher } from '../publisher/Publisher';
+import { ConnectionState, DataSource } from './DataSource';
+import { StateStream } from 'src/stateStream/StateStream';
 
-export class MqttConnector extends Connector {
+export class RemoteMqttServer extends DataSource {
   private client: MqttClient;
 
   public constructor() {
@@ -12,9 +12,10 @@ export class MqttConnector extends Connector {
   public connect(options: { host: string }) {
     this.client = connect(`mqtt://${options.host}`);
     this.client.on('message', (topic, message) => {
-      this.subscriptions[topic].publish(JSON.parse(message.toString()));
+      this.subscriptions[topic].updateState(JSON.parse(message.toString()));
     });
     this.client.on('connect', (_: IConnackPacket) => {
+      this.updateState(ConnectionState.Connected);
       this.client.subscribe(Object.keys(this.subscriptions) as string[], {
         qos: 0,
         nl: false,
@@ -22,9 +23,9 @@ export class MqttConnector extends Connector {
     });
   }
 
-  publish(key: string, publisher: Publisher<any>) {
-    publisher.subscribe((data) => {
-      this.client.publish(key, JSON.stringify(data), {
+  publish(key: string, publisher: StateStream<any>) {
+    publisher.then((stateChange) => {
+      this.client.publish(key, JSON.stringify(stateChange.to.value), {
         qos: 0,
         dup: false,
         retain: true,

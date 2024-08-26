@@ -1,10 +1,10 @@
 import { createBroker } from 'aedes';
 import { Server, createServer } from 'net';
-import { Connector } from './connector/Connector';
+import { DataSource } from './DataSource';
 import Aedes from 'aedes/types/instance';
-import { Publisher } from './publisher/Publisher';
+import { StateStream } from '../stateStream/StateStream';
 
-export class LocalMqtt extends Connector {
+export class LocalMqttServer extends DataSource {
   private readonly _mqttHandler: Aedes;
   private readonly _server: Server;
 
@@ -12,12 +12,6 @@ export class LocalMqtt extends Connector {
     super();
     this._mqttHandler = createBroker();
     this._server = createServer(this._mqttHandler.handle);
-
-    /*
-            aedes.on("publish", (a, b) => {
-                //console.log(a, b);
-            })
-        */
   }
 
   public connect(options: { port?: number }) {
@@ -26,7 +20,7 @@ export class LocalMqtt extends Connector {
       this._mqttHandler.subscribe(
         key,
         (packet) => {
-          this.subscriptions[key].publish(
+          this.subscriptions[key].updateState(
             JSON.parse(packet.payload.toString()),
           );
         },
@@ -34,9 +28,9 @@ export class LocalMqtt extends Connector {
       );
     });
   }
-
-  public publish(key: string, publisher: Publisher<any>) {
-    publisher.subscribe((data) => {
+  
+  public publish(key: string, publisher: StateStream<any>) {
+    publisher.then((stateChange) => {
       this._mqttHandler.publish(
         {
           cmd: 'publish',
@@ -44,7 +38,7 @@ export class LocalMqtt extends Connector {
           dup: false,
           retain: false,
           topic: key,
-          payload: JSON.stringify(data),
+          payload: JSON.stringify(stateChange.to.value),
         },
         (_) => {},
       );
