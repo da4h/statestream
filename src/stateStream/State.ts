@@ -26,6 +26,6 @@ export class StateChange<T> {
   }
 
   public isChanged(): boolean {
-    return this.from?.value !== this.to?.value;
+    return JSON.stringify(this.from?.value) !== JSON.stringify(this.to?.value);
   }
 }

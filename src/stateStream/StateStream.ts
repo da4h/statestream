@@ -143,7 +143,8 @@ export class StateStream<T> {
     this.onError(publisher);
     this.onEmpty(publisher);
     this.then((stateChange) => {
-      publisher.updateState(stateChange.to.value[key]);
+      if (stateChange.to.value.hasOwnProperty(key))
+        publisher.updateState(stateChange.to.value[key]);
     });
     return publisher;
   }
@@ -194,6 +195,23 @@ export class StateStream<T> {
       } else {
         publisher.updateState(stateChange.to);
       }
+    });
+    return publisher;
+  }
+
+  public autoReset(ms: number): StateStream<T> {
+    const publisher = this.createStream<T>();
+    this.onError(publisher);
+    this.onEmpty(publisher);
+    let timeout = null;
+    this.then((stateChange) => {
+      if (timeout !== null) {
+        clearTimeout(timeout);
+      }
+      timeout = setTimeout(() => {
+        publisher.updateState(undefined);
+      }, ms);
+      publisher.updateState(stateChange.to);
     });
     return publisher;
   }
